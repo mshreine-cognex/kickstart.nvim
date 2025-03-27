@@ -664,8 +664,6 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
       },
@@ -692,12 +690,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
@@ -819,7 +817,6 @@ require('lazy').setup({
     'echasnovski/mini.nvim',
     config = function()
       -- Better Around/Inside textobjects
-      --
       -- Examples:
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
@@ -827,7 +824,6 @@ require('lazy').setup({
       require('mini.ai').setup { n_lines = 500 }
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
@@ -848,8 +844,15 @@ require('lazy').setup({
         return '%2l:%-2v'
       end
 
-      -- ... and there is more!
-      --  Check out: https://github.com/echasnovski/mini.nvim
+      local gen_loader = require('mini.snippets').gen_loader
+      require('mini.snippets').setup {
+        snippets = {
+          gen_loader.from_file '~/.config/nvim/snippets/global.json',
+          -- This loads in-sight specific snippets
+          gen_loader.from_file '.vscode/snippets.code-snippets',
+          gen_loader.from_lang(),
+        },
+      }
     end,
   },
   { -- Highlight, edit, and navigate code
