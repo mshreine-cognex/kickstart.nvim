@@ -7,8 +7,6 @@ return {
       local lint = require 'lint'
       lint.linters_by_ft = {
         markdown = { 'markdownlint' },
-        typescript = { 'eslint_d' },
-        javascript = { 'eslint_d' },
       }
 
       -- To allow other plugins to add linters to require('lint').linters_by_ft,
@@ -57,14 +55,6 @@ return {
           end
         end,
       })
-
-      vim.api.nvim_create_user_command('EsLintFixAll', function()
-        vim.cmd '%!eslint_d --stdin --fix-to-stdout --stdin-filename %'
-      end, {})
-
-      vim.keymap.set('n', '<leader>ce', function()
-        vim.api.nvim_command 'EsLintFixAll'
-      end, { desc = 'Eslint Fix All' })
     end,
   },
 }

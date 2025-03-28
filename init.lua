@@ -155,7 +155,8 @@ require('lazy').setup({
   -- Then, because we use the `opts` key (recommended), the configuration runs
   -- after the plugin has been loaded as `require(MODULE).setup(opts)`.
 
-  { -- Useful plugin to show you pending keybinds.
+  -- Useful plugin to show you pending keybinds.
+  {
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
@@ -492,13 +493,14 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
+        eslint = {
+          settings = {
+            packageManager = 'npm',
+            workingDirectories = { mode = 'auto' },
+          },
+        },
         ts_ls = {
           on_attach = function(client, bufnr)
-            vim.api.nvim_create_autocmd('BufWritePre', {
-              buffer = bufnr,
-              command = 'OrganizeImports',
-            })
-
             vim.keymap.set('n', '<leader>co', function()
               vim.api.nvim_command 'OrganizeImports'
             end, { desc = 'Organize Imports' })
@@ -588,9 +590,13 @@ require('lazy').setup({
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
+        local lsp_last_filetypes = { typescript = true, javascript = true }
         local lsp_format_opt
         if disable_filetypes[vim.bo[bufnr].filetype] then
           lsp_format_opt = 'never'
+        -- ensures that the typescript lsp's are called on save
+        elseif lsp_last_filetypes[vim.bo[bufnr].filetype] then
+          lsp_format_opt = 'last'
         else
           lsp_format_opt = 'fallback'
         end
@@ -603,8 +609,18 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
-        javascript = { 'prettierd', 'prettier', stop_after_first = true },
-        typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        javascript = { 'prettierd' },
+        typescript = { 'prettierd' },
+        htmlangular = { 'prettierd' },
+        html = { 'prettierd' },
+        json = { 'prettierd' },
+      },
+      formatters = {
+        prettierd = {
+          condition = function()
+            return vim.loop.fs_realpath '.prettierrc.json'
+          end,
+        },
       },
     },
   },
