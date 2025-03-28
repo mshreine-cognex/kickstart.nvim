@@ -625,17 +625,22 @@ require('lazy').setup({
           --    https://github.com/rafamadriz/friendly-snippets
           {
             'rafamadriz/friendly-snippets',
-            config = function()
-              require('luasnip.loaders.from_vscode').lazy_load()
-            end,
+            'benfowler/telescope-luasnip.nvim',
           },
         },
+        config = function(_, opts)
+          if opts then
+            require('luasnip').config.setup(opts)
+          end
+          vim.tbl_map(function(type)
+            require('luasnip.loaders.from_' .. type).lazy_load()
+          end, { 'vscode', 'snipmate', 'lua' })
+
+          require('luasnip').filetype_extend('typescript', { 'tsdoc', 'angular' })
+          require('luasnip').filetype_extend('htmlangular', { 'html', 'angular' })
+        end,
       },
       'saadparwaiz1/cmp_luasnip',
-
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-nvim-lsp-signature-help',
@@ -645,6 +650,12 @@ require('lazy').setup({
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
+
+      require('telescope').load_extension 'luasnip'
+
+      vim.keymap.set('n', '<leader>sp', function()
+        vim.api.nvim_command 'Telescope luasnip'
+      end, { desc = '[S]earch sni[p]' })
 
       cmp.setup {
         snippet = {
@@ -673,12 +684,6 @@ require('lazy').setup({
           --  This will expand snippets if the LSP sent a snippet.
           ['<C-y>'] = cmp.mapping.confirm { select = true },
 
-          -- If you prefer more traditional completion keymaps,
-          -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
-
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
@@ -702,6 +707,12 @@ require('lazy').setup({
               luasnip.jump(-1)
             end
           end, { 'i', 's' }),
+
+          ['<C-E>'] = cmp.mapping(function()
+            if luasnip.choice_active() then
+              luasnip.change_choice(1)
+            end
+          end, { silent = true }),
 
           -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -788,16 +799,6 @@ require('lazy').setup({
       statusline.section_location = function()
         return '%2l:%-2v'
       end
-
-      local gen_loader = require('mini.snippets').gen_loader
-      require('mini.snippets').setup {
-        snippets = {
-          gen_loader.from_file '~/.config/nvim/snippets/global.json',
-          -- This loads in-sight specific snippets
-          gen_loader.from_file '.vscode/snippets.code-snippets',
-          gen_loader.from_lang(),
-        },
-      }
     end,
   },
   { -- Highlight, edit, and navigate code
