@@ -620,8 +620,6 @@ require('lazy').setup({
           return 'make install_jsregexp'
         end)(),
         dependencies = {
-          -- `friendly-snippets` contains a variety of premade snippets.
-          --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
           {
             'rafamadriz/friendly-snippets',
@@ -636,6 +634,7 @@ require('lazy').setup({
             require('luasnip.loaders.from_' .. type).lazy_load()
           end, { 'vscode', 'snipmate', 'lua' })
 
+          require('luasnip.loaders.from_vscode').load_standalone { path = './snippets/vscode/jasmine.code-snippets' }
           require('luasnip').filetype_extend('typescript', { 'tsdoc', 'angular' })
           require('luasnip').filetype_extend('htmlangular', { 'html', 'angular' })
         end,

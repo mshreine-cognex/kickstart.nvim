@@ -1,0 +1,22 @@
+{
+  "Basic Test Describe": {
+    "prefix": ["describe"],
+    "body": ["describe('$1', () => {", "  $2", "});"],
+    "description": "Inserts a describe block",
+    "scope": "typescript",
+  },
+  "spectator: Component Test Describe Block": {
+    "prefix": "spec-describe",
+    "body": [
+      "describe('$1', () => {",
+      "  let spectator: Spectator<$1>;",
+      "  const factory = createComponentFactory({",
+      "    component: $1,",
+      "    $2",
+      "  });",
+      "});"
+    ],
+    "description": "Generate a describe block for a component test using ngneat/spectator",
+    "scope": "typescript",
+  }
+}
