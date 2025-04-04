@@ -68,3 +68,89 @@ vim.keymap.set('n', '<leader>bw', ':.+,$bwipeout<CR>', { desc = 'Wipeout backgro
 which.add {
   { '<leader>b', group = '[B]uffers' },
 }
+
+return {
+  {
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    enabled = true,
+    lazy = false,
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      local harpoon = require 'harpoon'
+      ---@diagnostic disable-next-line
+      harpoon.setup {}
+
+      -- basic telescope configuration
+      local conf = require('telescope.config').values
+      local function toggle_telescope(harpoon_files)
+        local file_paths = {}
+        for _, item in ipairs(harpoon_files.items) do
+          table.insert(file_paths, item.value)
+        end
+
+        require('telescope.pickers')
+          .new({}, {
+            prompt_title = 'Harpoon',
+            finder = require('telescope.finders').new_table {
+              results = file_paths,
+            },
+            previewer = conf.file_previewer {},
+            sorter = conf.generic_sorter {},
+          })
+          :find()
+      end
+
+      vim.keymap.set('n', '<leader>ua', function()
+        harpoon:list():add()
+      end, { desc = '[A]dd file' })
+      vim.keymap.set('n', '<leader>uf', function()
+        toggle_telescope(harpoon:list())
+      end, { desc = 'Open Telescope Harpoon ' })
+      vim.keymap.set('n', '<C-e>', function()
+        harpoon.ui:toggle_quick_menu(harpoon:list())
+      end, { desc = 'Toggle harpoon menu' })
+      vim.keymap.set('n', '<leader>u1', function()
+        harpoon:list():select(1)
+      end, { desc = 'Go to 1 in harpoon list' })
+      vim.keymap.set('n', '<leader>u2', function()
+        harpoon:list():select(2)
+      end, { desc = 'Go to 2 in harpoon list' })
+      vim.keymap.set('n', '<leader>u3', function()
+        harpoon:list():select(3)
+      end, { desc = 'Go to 3 in harpoon list' })
+      vim.keymap.set('n', '<leader>u4', function()
+        harpoon:list():select(4)
+      end, { desc = 'Go to 4 in harpoon list' })
+      -- Toggle previous & next buffers stored within Harpoon list
+      vim.keymap.set('n', '<leader>up', function()
+        harpoon:list():prev()
+      end, { desc = '[P]rev' })
+      vim.keymap.set('n', '<leader>un', function()
+        harpoon:list():next()
+      end, { desc = '[N]ext' })
+
+      local wkey = require 'which-key'
+      wkey.add({
+        { '<leader>u', group = 'Harpoon' },
+      }, {})
+
+      -- Extend the harpoon actions
+      harpoon:extend {
+        UI_CREATE = function(cx)
+          vim.keymap.set('n', '<C-v>', function()
+            harpoon.ui:select_menu_item { vsplit = true }
+          end, { buffer = cx.bufnr })
+
+          vim.keymap.set('n', '<C-x>', function()
+            harpoon.ui:select_menu_item { split = true }
+          end, { buffer = cx.bufnr })
+
+          vim.keymap.set('n', '<C-t>', function()
+            harpoon.ui:select_menu_item { tabedit = true }
+          end, { buffer = cx.bufnr })
+        end,
+      }
+    end,
+  },
+}
